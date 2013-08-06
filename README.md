@@ -5,6 +5,7 @@ Sort images into directories based on their exchangeable image file format
 
 ###Features###
  - Reads JPEG (JPG) and Canon Raw Format (CR2)
+ - Parses EXIF written by Canon EOS series cameras
  - Sorts into directories based on the ordered list of sort parameters
  - Copy or Move images
  - Sort Parameters
@@ -55,6 +56,8 @@ This should result in the creation of many folders/subdirs, Something that looks
 ###Dependencies###
 [exif-py](https://github.com/ianare/exif-py)
 
-virtualenv: pip install exifread
-Fedora: sudo yum install python-exif
-Ubuntu: sudo apt-get install python-exif
+	virtualenv: pip install exifread
+
+	Fedora: sudo yum install python-exif
+	
+	Ubuntu: sudo apt-get install python-exif
