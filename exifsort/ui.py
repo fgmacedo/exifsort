@@ -22,39 +22,72 @@ __copyright__ = __author__
 __license__ = "Check root folder LICENSE file"
 __email__ = "andrew.g.dunn@gmail.com"
 
-import sys # For argument order
-import os.path
+import sys
 import argparse
+import os
 
-from exifsort.util import search_path_by_extension, du_path, du_list
+from exifsort.util import config_read_extensions
+from exifsort.util import search_path_by_extension
+
+#import exifread
+
 
 def main():
+    """
+     * Parse arguments
+     * Gather the sort order
+     * Test the path
+     * Get the size of the images (du_list_size)
+     * Get the size of the path (du_path_size)
+     * Warn user if different sizes
+     * Move through list (copy/move) images into folders
+    """
 
     description = """Organize a folder of images into sub-folders based on the order of sorting parameters."""
 
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('input_path', help='The path of images to be sorted recursively')
     parser.add_argument('output_path', help='The path to make a \'sorted\' directory structure')
-    parser.add_argument('-C', '--copy', dest='copy', action='store_true', help='Copy the images')
-    parser.add_argument('-X', '--cut', dest='cut', action='store_true', help='Cut the images')
-    #parser.add_argument('-V', '--video', help='Copy/Cut found Video')
-    parser.add_argument('-d', '--date', dest='date', action='store_true', help='Sort by Date')
-    parser.add_argument('-c', '--camera', dest='camera', action='store_true', help='Sort by Camera Model')
-    parser.add_argument('-l', '--lens', dest='lens', action='store_true', help='Sort by Lens Model')
-    parser.add_argument('-o', '--orient', dest='orient', action='store_true', help='Sort by Orientation')
-    parser.add_argument('-f', '--flash', dest='flash', action='store_true', help='Sort by if Flash fired')
+    # Optional sort parameters
+    parser.add_argument('-d', '--date', dest='sort_date', action='store_true', help='Sort by Date')
+    parser.add_argument('-c', '--camera', dest='sort_camera', action='store_true', help='Sort by Camera Model')
+    parser.add_argument('-l', '--lens', dest='sort_lens', action='store_true', help='Sort by Lens Model')
+    parser.add_argument('-o', '--orient', dest='sort_orient', action='store_true', help='Sort by Orientation')
+    parser.add_argument('-f', '--flash', dest='sort_flash', action='store_true', help='Sort by if Flash fired')
 
     args = parser.parse_args()
     
-    print args #dis is for debug
-    print sys.argv #dis is for order
-
     if os.path.exists(args.input_path):
-        du_path_size = du_path(args.input_path)
-        images = search_path_by_extension(args.input_path, True, "JPG", "CR2")
-        du_list_size = du_list(images)
-        print du_path_size / 1024 / 1024
-        print du_list_size / 1024 / 1024
+        image_extensions = config_read_extensions('image')
+        image_list = search_path_by_extension(args.input_path, True, image_extensions)
+        ordered_path = ordered_path(sys.argv)
 
+        for image in image_list:
+            tags = exifread.process_file(open(os.path.join(args.input_path, image)), details=False, stop_tag='JPEGThumbnail')
+            new_path = args.output_path
+            
+            for sort in ordered_path.keys():
+
+            # pull exif
+
+
+        pass
     else:
-        print 'input path does not exist'
+        print 'Path does not exist'
+        return
+
+
+# FOR VIDEO MOVEMENT            
+# video_extensions = config_read_extensions('video')
+# video_list = search_path_by_extension(args.input_path, True, video_extensions)
+    
+
+# if not args.video and args.cut and video_list:
+#     print 'The Following Videos will be left behind:\n'
+#     for video in video_list:
+#         print video
+
+# if args.video and video_list:
+#     for video in video_list:
+#         # move to base destination directo
+#         pass
