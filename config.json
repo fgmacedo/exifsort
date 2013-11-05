@@ -1,15 +1,9 @@
 {
 	"meta" : {
-		"date" : "Image DateTime",
-		"camera" : "Image Model",
-		"lens" : "EXIF Tag 0xA434",
-		"orient" : "Image Orientation"
-	},
-	"order" : {
-		"date" : "-d --date",
-		"camera" : "-c --camera",
-		"lens" : "-l --lens",
-		"orient" : "-o --orient"
+		"date" : ["Image DateTime"],
+		"camera" : ["Image Model"],
+		"lens" : ["EXIF Tag 0xA434"],
+		"orientation" : ["Image Orientation"]
 	},
 	"extensions" : {
 		"image" : "jpg jpeg cr2 nef rw2 arw srf sr2",

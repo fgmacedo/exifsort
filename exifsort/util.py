@@ -5,7 +5,6 @@
 util.py
 ~~~~
 
-Miscellaneous utility functions.
 """
 __author__ = ["Andrew G. Dunn"]
 __copyright__ = __author__
@@ -17,23 +16,44 @@ import os
 import datetime
 import json
 
-def config_read_extensions(extension):
+
+def config_read_meta(ordered_args):
+    """
+    Takes in the custom OrderedAction created ordered_args and creates a
+    dictionary that respects the original order while associating the necessary
+    exif lookup keys.
+    """
     config_file = json.load(open(os.path.join(os.path.dirname(__file__), '../config.json')))
-    config_image_extensions = config_file['extensions'][extension].split()
 
-    image_extensions = []
+    clean_ordered_args = []
 
-    for extension in config_image_extensions:
-        image_extensions.append(str(extension))
-        image_extensions.append(str(extension.upper()))
+    for arg in ordered_args:
+        clean_ordered_args.append(arg[0])
 
-    return image_extensions
+    meta_dictionary = {}
+
+    for key in clean_ordered_args:
+        key_meta = config_file['meta'][key]
+        meta_dictionary[key] = key_meta
+
+    return meta_dictionary
 
 
-def ordered_path(sysarg):
-    
+def config_read_extensions(extension):
+    """
+    Returns a list of possible extensions for each media type {image, video}.
+    Makes sure to do both lower and upper case.
+    """
+    config_file = json.load(open(os.path.join(os.path.dirname(__file__), '../config.json')))
+    config_extensions = config_file['extensions'][extension].split()
 
-    pass
+    extensions = []
+
+    for extension in config_extensions:
+        extensions.append(str(extension))
+        extensions.append(str(extension.upper()))
+
+    return extensions
 
 
 def search_path_by_extension(path, recurse, extension_list):
@@ -60,11 +80,23 @@ def search_path_by_extension(path, recurse, extension_list):
     return sorted(file_list)
 
 
-def parse_date(exif_datetime):
-    """
-    """
-    parse_format = '%Y:%m:%d %H:%M:%S'
-    return datetime.datetime.strptime(exif_datetime, parse_format)
+def sort_path(output_path, meta_dictionary, exif):
+
+    sort_keys = []
+
+    for key in meta_dictionary.keys():
+        for meta in meta_dictionary[key]:
+            if meta in exif:
+                if key == 'date':
+                    sort_keys.append(parse_date(str(exif[meta])))
+                elif key == 'lens':
+                    sort_keys.append(parse_lens(str(exif[meta])))
+                else:
+                    sort_keys.append(str(exif[meta]))
+                break        
+
+    return os.path.join(output_path, *sort_keys)
+
 
 
 def copy_image(image_path, destination_path):
@@ -75,9 +107,14 @@ def move_image(image_path, destination_path):
     pass
 
 
-def check_path_create(path):
-    """Check the path, if it doesn't exist then
-    create it and return true
-    """
+def parse_date(exif_datetime):
+    parse_format = '%Y:%m:%d %H:%M:%S'
+    return datetime.datetime.strptime(exif_datetime, parse_format)
+
+
+def parse_lens(exif_lens):
+    return exif_lens.split(',')[0]
+
+
     
 
