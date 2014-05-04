@@ -15,7 +15,7 @@ __email__ = "andrew.g.dunn@gmail.com"
 import os
 import datetime
 import json
-
+import shutil
 
 def config_read_meta(ordered_args):
     """
@@ -80,31 +80,36 @@ def search_path_by_extension(path, recurse, extension_list):
     return sorted(file_list)
 
 
-def sort_path(output_path, meta_dictionary, exif):
+def sort_path(input_path, output_path, meta_dictionary, exif):
 
     sort_keys = []
 
-    for key in meta_dictionary.keys():
-        for meta in meta_dictionary[key]:
+    for key, metas in meta_dictionary.items():
+        for meta in metas:
             if meta in exif:
                 if key == 'date':
-                    sort_keys.append(parse_date(str(exif[meta])))
+                    sort_keys.append(format_date(parse_date(str(exif[meta]))))
                 elif key == 'lens':
                     sort_keys.append(parse_lens(str(exif[meta])))
                 else:
                     sort_keys.append(str(exif[meta]))
-                break        
+                break
+            elif key == 'date':
+                sort_keys.append(format_date(datetime.datetime.fromtimestamp(input_path.stat().st_mtime)))
 
+    if not sort_keys:
+        import pdb; pdb.set_trace()
     return os.path.join(output_path, *sort_keys)
 
 
 
 def copy_image(image_path, destination_path):
-    pass
+    shutil.copyfile(image_path, destination_path)
 
 
 def move_image(image_path, destination_path):
     pass
+    shutil.move(image_path, destination_path)
 
 
 def parse_date(exif_datetime):
@@ -116,5 +121,17 @@ def parse_lens(exif_lens):
     return exif_lens.split(',')[0]
 
 
-    
+def format_date(date):
+    return '{0:%Y/%Y-%m-%d/%Y-%m-%d_%H-%M-%S}'.format(date)
+
+def unique_path(image_path, dest_path):
+    if not dest_path.exists():
+        return dest_path
+    if image_path.stat().st_size == dest_path.stat().st_size:
+        return dest_path
+    image_id = ''.join(s for s in unicode(image_path) if s.isdigit())
+    if image_id:
+        return dest_path.parent.joinpath(
+            '{}_{}{}'.format(dest_path.stem, image_id, dest_path.suffix))
+    raise IOError('{} already exists'.format(dest_path))
 

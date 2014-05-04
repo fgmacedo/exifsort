@@ -13,12 +13,14 @@ __email__ = "andrew.g.dunn@gmail.com"
 
 import argparse
 import os
+import pathlib
 
 from exifsort.util import config_read_meta
 from exifsort.util import config_read_extensions
 from exifsort.util import search_path_by_extension
 from exifsort.util import sort_path
 from exifsort.util import copy_image, move_image
+from exifsort.util import unique_path
 
 import exifread
 
@@ -68,31 +70,21 @@ def main():
         image_list = search_path_by_extension(args.input_path, True, image_extensions)
 
         for image in image_list:
-            image_path = os.path.join(args.input_path, image)
-            exif = exifread.process_file(open(image_path), details=False, stop_tag='JPEGThumbnail')
-            dest_path = sort_path(args.output_path, meta_dictionary, exif)
-            print dest_path
+            image_path = pathlib.Path(os.path.join(args.input_path, image))
+            extension = image_path.suffix
+            exif = exifread.process_file(open(unicode(image_path)), details=False, stop_tag='JPEGThumbnail')
 
-            # if args.move:
-            #     move_image(image_path, dest_path)
-            # else:
-            #     copy_image(image_path, dest_path)
+            dest_path = sort_path(image_path, args.output_path, meta_dictionary, exif) + extension
+            unique_dest_path = unique_path(image_path, pathlib.Path(dest_path))
+            dest_dir = os.path.dirname(unicode(unique_dest_path))
+            if not os.path.exists(dest_dir):
+                os.makedirs(dest_dir)
+            print "writting: ", unique_dest_path
+
+            if args.move:
+                move_image(unicode(image_path), unicode(unique_dest_path))
+            else:
+                copy_image(unicode(image_path), unicode(unique_dest_path))
     else:
         print 'Path does not exist'
         return
-
-
-# FOR VIDEO MOVEMENT            
-# video_extensions = config_read_extensions('video')
-# video_list = search_path_by_extension(args.input_path, True, video_extensions)
-    
-
-# if not args.video and args.cut and video_list:
-#     print 'The Following Videos will be left behind:\n'
-#     for video in video_list:
-#         print video
-
-# if args.video and video_list:
-#     for video in video_list:
-#         # move to base destination directo
-#         pass
