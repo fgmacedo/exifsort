@@ -54,15 +54,8 @@ def main():
     parser.add_argument('output_path', help='The path to make a \'sorted\' directory structure')
     # sort actions
     parser.add_argument('--move', action='store_true', help='Move Files, default action is to copy')
-    parser.add_argument('--video', action='store_true', help='Find and move video to the output_path')
-    # sort parameters
-    parser.add_argument('-d', '--date', nargs=0, action=OrderedAction, help='Sort by Date')
-    parser.add_argument('-c', '--camera', nargs=0, action=OrderedAction, help='Sort by Camera Body')
-    parser.add_argument('-l', '--lens', nargs=0, action=OrderedAction, help='Sort by Lens')
-    parser.add_argument('-o', '--orientation', nargs=0, action=OrderedAction, help='Sort by Orientation')
-
     args = parser.parse_args()
-    meta_dictionary = config_read_meta(args.ordered_args)
+    meta_dictionary = config_read_meta(['date'])
     image_extensions = config_read_extensions('image')
 
 
@@ -72,7 +65,10 @@ def main():
         for image in image_list:
             image_path = pathlib.Path(os.path.join(args.input_path, image))
             extension = image_path.suffix
-            exif = exifread.process_file(open(unicode(image_path)), details=False, stop_tag='JPEGThumbnail')
+            try:
+                exif = exifread.process_file(open(unicode(image_path)), details=False, stop_tag='JPEGThumbnail')
+            except:
+                exif = {}
 
             dest_path = sort_path(image_path, args.output_path, meta_dictionary, exif) + extension
             unique_dest_path = unique_path(image_path, pathlib.Path(dest_path))

@@ -6,7 +6,7 @@
 		"orientation" : ["Image Orientation"]
 	},
 	"extensions" : {
-		"image" : "jpg jpeg cr2 nef rw2 arw srf sr2",
+		"image" : "jpg jpeg cr2 nef rw2 arw srf sr2 mov avi mkv m4v mpeg ogg mp4 mts",
 		"video" : "mov avi mkv m4v mpeg ogg"
 	}
 }

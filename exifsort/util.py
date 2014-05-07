@@ -25,14 +25,9 @@ def config_read_meta(ordered_args):
     """
     config_file = json.load(open(os.path.join(os.path.dirname(__file__), '../config.json')))
 
-    clean_ordered_args = []
-
-    for arg in ordered_args:
-        clean_ordered_args.append(arg[0])
-
     meta_dictionary = {}
 
-    for key in clean_ordered_args:
+    for key in ordered_args:
         key_meta = config_file['meta'][key]
         meta_dictionary[key] = key_meta
 
@@ -124,14 +119,15 @@ def parse_lens(exif_lens):
 def format_date(date):
     return '{0:%Y/%Y-%m-%d/%Y-%m-%d_%H-%M-%S}'.format(date)
 
+
 def unique_path(image_path, dest_path):
     if not dest_path.exists():
         return dest_path
     if image_path.stat().st_size == dest_path.stat().st_size:
         return dest_path
-    image_id = ''.join(s for s in unicode(image_path) if s.isdigit())
+    image_id = filter(lambda x: x.isdigit(), unicode(image_path))
     if image_id:
         return dest_path.parent.joinpath(
-            '{}_{}{}'.format(dest_path.stem, image_id, dest_path.suffix))
+            u'{}_{}{}'.format(dest_path.stem, image_id, dest_path.suffix))
     raise IOError('{} already exists'.format(dest_path))
 
